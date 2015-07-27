@@ -21,3 +21,4 @@ ADD ./playbooks ./playbooks
 ADD ./roles ./roles
 ADD ./ansible.cfg ./
 ADD ./site.yml ./
+ADD ./ssh_config ./

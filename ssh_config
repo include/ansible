@@ -4,6 +4,7 @@ Compression yes
 Port 22
 ConnectTimeout 60
 
-Host 172.*
-    ProxyCommand ssh -l ubuntu 172.22.6.70 -W %h:%p
-    #IdentityFile ~/.ssh/...
+# Example
+#Host 172.*
+#    ProxyCommand ssh -l ubuntu 172.22.6.70 -W %h:%p
+#    #IdentityFile ~/.ssh/...
