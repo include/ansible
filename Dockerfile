@@ -1,4 +1,4 @@
-FROM ansible/ubuntu14.04-ansible
+FROM ubuntu
 MAINTAINER include <francisco.cabrita@gmail.com>
 
 RUN apt-get update && apt-get install -y \
@@ -11,7 +11,10 @@ RUN apt-get update && apt-get install -y \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install boto \
+RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
+    python get-pip.py && \
+    pip install \
+    boto \
     awscli
 
 WORKDIR /ansible
