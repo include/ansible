@@ -1,8 +1,21 @@
-FROM ubuntu
+FROM ubuntu:14.04
 MAINTAINER include <francisco.cabrita@gmail.com>
 
-RUN apt-get update && apt-get install -y \
+ENV DEBIAN_FRONTEND noninteractive
+ENV LANGUAGE en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+    language-pack-en && \
+    locale-gen en_US.UTF-8 && dpkg-reconfigure locales && \
+    apt-get install -y \
     build-essential \
+    gcc \
+    make \
+    python-dev \
+    python-software-properties \
+    python-simplejson \
     wget \
     curl \
     tmux \
@@ -15,7 +28,13 @@ RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
     python get-pip.py && \
     pip install \
     boto \
-    awscli
+    awscli \
+    paramiko \
+    PyYAML \
+    Jinja2 \
+    httplib2 \
+    six \
+    ansible
 
 WORKDIR /ansible
 
