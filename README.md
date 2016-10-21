@@ -1,4 +1,4 @@
-# ansible
+# Ansible
 
 ## This is a simple Ansible setup to work with AWS.
 

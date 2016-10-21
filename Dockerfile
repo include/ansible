@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:latest
 MAINTAINER include <francisco.cabrita@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -13,28 +13,24 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     build-essential \
     gcc \
     make \
+    software-properties-common && \
+    apt-add-repository ppa:ansible/ansible -y && \
+    apt-get update && apt-get install -y \
+    ansible \
     python-dev \
     python-software-properties \
     python-simplejson \
+    python-boto3 \
+    python3-boto3 \
+    awscli \
     wget \
     curl \
-    tmux \
     git \
     s3cmd && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get clean
 
 RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
-    python get-pip.py && \
-    pip install \
-    boto \
-    awscli \
-    paramiko \
-    PyYAML \
-    Jinja2 \
-    httplib2 \
-    six \
-    ansible
+    python get-pip.py
 
 WORKDIR /ansible
 
