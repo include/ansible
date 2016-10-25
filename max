@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION="0.2"
 SCRIPTNAME=`basename $0`
 ROOTDIR="../../../"
 CURDIR=`pwd`
 
 ANSIBLE_OPTS="-v"
 ANSIBLE_PLAYBOOK="`which ansible-playbook` ${ANSIBLE_OPTS}"
+
+PLBK_PREFIX="plbk-"
 
 export MAX_WHAT=$1
 export MAX_ACTION=$2
@@ -51,7 +52,7 @@ function getEnvironment() {
 
 # Prepares the command line statement to be executed by Ansible.
 function runPlay() {
-    CMD="${ANSIBLE_PLAYBOOK} -i ${ANSIBLE_HOSTS} ./playbooks/plbk-${MAX_WHAT}.yml"
+    CMD="${ANSIBLE_PLAYBOOK} -i ${ANSIBLE_HOSTS} ./playbooks/${PLBK_PREFIX}${MAX_WHAT}.yml"
     echo ${CMD} ; exec ${CMD}
 }
 
@@ -112,7 +113,7 @@ function undeploy() {
 }
 
 function getListofServices {
-    for i in playbooks/plbk-*.yml
+    for i in playbooks/"${PLBK}"*.yml
     do
         echo $i
         ansible-playbook --list-tags -i inventories/prd-sample $i | grep "TASK TAGS:"
@@ -124,8 +125,6 @@ function myhelp() {
 cat << EOH
 Usage:
   ./max.sh [WHAT] [ACTION] [ENVIRONMENT]
-
-  What     | Actions                       | Environments
 
   ie:
     ./max.sh sample-service-go fetch prd
