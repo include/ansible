@@ -1,0 +1,14 @@
+---
+# file: #roles/common/tasks/main.yml
+
+- name: SYSTEM / redhat
+  include: redhat.yml
+  when: ansible_distribution == "Redhat"
+
+- name: SYSTEM / amazon
+  include: amazon.yml
+  when: ansible_distribution == "Amazon"
+
+- name: SYSTEM / ubuntu
+  include: ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'

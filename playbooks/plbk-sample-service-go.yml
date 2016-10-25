@@ -1,0 +1,62 @@
+---
+# file: #playbooks/plbk-sample-service-go.yml
+
+- hosts: all
+  strategy: linear
+
+  vars:
+    max_action: "{{ lookup('env', 'MAX_ACTION')}}"
+    max_what: "{{ lookup('env', 'MAX_WHAT')}}"
+    max_env: "{{ lookup('env', 'MAX_ENV')}}"
+    max_who: "{{ lookup('env', 'MAX_WHO')}}"
+    max_sudo: "{{ lookup('env', 'MAX_SUDO')}}"
+    max_version: "{{ lookup('env', 'MAX_VERSION')}}"
+
+  vars_files:
+    - ../group_vars/all
+
+  tasks:
+
+    - name: fetch repository
+      local_action: git repo={{ git_root }}/{{ max_what }}.git
+        accept_hostkey=yes
+        key_file=~/.ssh/id_rsa
+        dest=/tmp/{{ max_what }}
+        version={{ git_branch }}
+      run_once: True
+      when: max_action == "fetch" and inventory_hostname in groups['{{ max_what }}']
+      tags: fetch
+
+    - name: build container image
+      local_action: shell cd /tmp/{{ max_what }} && VERSION={{ max_version }} make
+      run_once: True
+      when: max_action == "build"
+      tags: build
+
+    - name: test service
+      local_action: shell cd /tmp/{{ max_what }} && make test
+      run_once: True
+      register: result
+      when: max_action == "test"
+      tags: test
+      #- debug: msg="{{ result }}"
+
+    - name: push image to registry
+      local_action: shell docker push {{ docker_registry }}/{{ max_what }}:{{ max_version }}
+        #sudo docker push {{ docker_registry }}/{{ max_what }}:{{ max_version }}
+      run_once: True
+      when: max_action == "push"
+      tags: push
+
+    - name: deploy container to server
+      command: >
+        sudo docker run -d --restart=always --name {{ max_what }}
+        -p {{ HOST_PORT }}:{{ CONTAINER_PORT }}
+        {{ docker_registry }}/{{ max_what }}:{{ max_version }}
+      when: max_action == "deploy" and inventory_hostname in groups['{{ max_what }}']
+      tags: deploy
+
+    - name: undeploy container from server
+      shell: sudo docker stop {{ max_what}} && sudo docker rm -f {{ max_what }}
+      when: max_action == "undeploy" and inventory_hostname in groups['{{ max_what }}']
+      tags: undeploy

@@ -1,0 +1,32 @@
+---
+# file: #playbooks/plbk-servicetemplate.yml
+
+- hosts: system
+  strategy: linear
+
+  vars:
+    max_action: "{{ lookup('env', 'MAX_ACTION')}}"
+    max_what: "{{ lookup('env', 'MAX_WHAT')}}"
+    max_env: "{{ lookup('env', 'MAX_ENV')}}"
+    max_who: "{{ lookup('env', 'MAX_WHO')}}"
+    max_sudo: "{{ lookup('env', 'MAX_SUDO')}}"
+
+  vars_files:
+    - ../group_vars/all
+
+  #roles:
+  #  - { role: ../roles/common/, when: ansible_distribution == "Ubuntu" }
+
+  tasks:
+
+    - name: setup docker
+      ping:
+      tags: docker
+
+    - name: ping
+      ping:
+      register: result
+      when: max_action == "ping"
+      tags: ping
+
+    - debug: msg="{{ result }}"

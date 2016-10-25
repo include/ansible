@@ -1,0 +1,58 @@
+---
+# file: #roles/common/tasks/main.yml
+
+# System configs
+
+# Prepare System Layout to Receive Configurations
+- name: common / creates /DATA/etc
+  file:
+    path="{{ project_etc_root }}"
+    mode=0644
+    owner=root
+    group=root
+    state=directory
+  when: max_action == "sync" and max_what == "system"
+  tags: sync
+
+- name: common / reates /DATA/src
+  file:
+    path="{{ project_etc_root }}"
+    mode=0644
+    owner=root
+    group=root
+    state=directory
+  when: max_action == "sync" and max_what == "system"
+  tags: sync
+
+# packages
+
+- name: common / apt-get update
+  apt: update_cache=yes cache_valid_time=3600
+  when: max_action == "sync" and max_env == "prd" and max_what == "system"
+  tags: pkgs
+
+- name: common / install ubuntu packages
+  apt: pkg={{ item }} state=latest
+  with_items: system_pkgs
+  when: max_action == "sync" and max_env == "prd" and max_what == "system"
+  tags: pkgs
+
+- name: common / apt-get autoclean
+  command: apt-get autoclean
+  ignore_errors: true
+  when: max_action == "sync" and max_env == "prd" and max_what == "system"
+  tags: pkgs
+
+- name: common / apt-get clean
+  command: apt-get clean
+  ignore_errors: true
+  when: max_action == "sync" and max_env == "prd" and max_what == "system"
+  tags: pkgs
+
+- name: fix /etc/timezone
+  command: >
+    echo "Europe/Lisbon" >> /etc/timezone &&
+    dpkg-reconfigure --frontend noninteractive tzdata
+  when: max_action == "sync" and max_env == "prd"
+  notify: restart-ntp
+  tags: sync

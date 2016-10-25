@@ -1,0 +1,26 @@
+[localhost]
+localhost ansible_connection=local
+
+[dockerhost]
+dockerhost ansible_host=192.168.33.10
+[dockerhost:vars]
+ansible_user=include
+ansible_ssh_private_key_file=~/.ssh/include_rsa.pub
+
+[container-cluster-A-template]
+srv-1 ansible_host=10.0.0.1
+srv-2 ansible_host=10.0.0.2
+srv-3 ansible_host=10.0.0.3
+srv-4 ansible_host=10.0.0.4
+[container-cluster-A-template:vars]
+ansible_user=include
+ansible_ssh_private_key_file=~/.ssh/include_rsa.pub
+
+[container-cluster-B-template]
+srv-11 ansible_host=10.0.0.11
+srv-22 ansible_host=10.0.0.22
+srv-33 ansible_host=10.0.0.33
+srv-44 ansible_host=10.0.0.44
+[container-cluster-B-template:vars]
+ansible_user=include
+ansible_ssh_private_key_file=~/.ssh/include_rsa.pub

@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+set -e
+
+VERSION="0.2"
+SCRIPTNAME=`basename $0`
+ROOTDIR="../../../"
+CURDIR=`pwd`
+
+ANSIBLE_OPTS="-v"
+ANSIBLE_PLAYBOOK="`which ansible-playbook` ${ANSIBLE_OPTS}"
+
+export MAX_WHAT=$1
+export MAX_ACTION=$2
+export MAX_ENV=$3
+
+# Extracts image version (tag) from cmdline like "sample-service-go:onbuild"
+# if blank, defaults to 'latest'
+export MAX_VERSION=$(echo "${MAX_WHAT}" | awk -F':' '{print $2}')
+
+if [ "${MAX_VERSION}" == "" ]; then
+    export MAX_VERSION="latest"
+fi
+
+export MAX_WHAT=$(echo $MAX_WHAT | awk -F':' '{print $1}')
+
+# Reads current user running max.sh and passes that variable into playbooks.
+# If this playboook is going to be targeted localy, local user is used, instead
+# root is used (on remote servers).
+WHOAMI=""
+MAX_WHO=""
+MAX_SUDO=""
+function chooseUser() {
+  WHOAMI=`whoami`
+  if [[ "${MAX_ENV}" == "dev" ]]; then
+    export MAX_WHO=${WHOAMI}
+    export MAX_SUDO="no"
+  fi
+}
+chooseUser
+
+# Loads different inventories based on ENV variable captured via cmdline.
+ANSIBLE_HOSTS=""
+function getEnvironment() {
+    if [ -f "inventories/${MAX_ENV}" ]; then
+        export ANSIBLE_HOSTS="inventories/${MAX_ENV}"
+    else
+        printf "ERROR: unknown Environment!\n"
+        exit 1;
+    fi
+}
+
+# Prepares the command line statement to be executed by Ansible.
+function runPlay() {
+    CMD="${ANSIBLE_PLAYBOOK} -i ${ANSIBLE_HOSTS} ./playbooks/plbk-${MAX_WHAT}.yml"
+    echo ${CMD} ; exec ${CMD}
+}
+
+# Ansible Tasks Wrapper
+function sync() {
+    getEnvironment
+    printf "Syncing ${MAX_WHAT} into ${MAX_ENV}...\n"
+    runPlay
+}
+function fetch() {
+    getEnvironment
+    printf "Fetching git repo ${MAX_WHAT} into ${MAX_ENV}...\n"
+    runPlay
+}
+function build() {
+    getEnvironment
+    printf "Building ${MAX_WHAT} into ${MAX_ENV}...\n"
+    runPlay
+}
+function test() {
+    getEnvironment
+    printf "Testing ${MAX_WHAT} into ${MAX_ENV}...\n"
+    runPlay
+}
+function ping() {
+    getEnvironment
+    printf "Pinging ${MAX_WHAT} into ${MAX_ENV}...\n"
+    runPlay
+}
+function exportContainer() {
+    getEnvironment
+    printf "Exporting ${MAX_WHAT} ${MAX_ENV}...\n"
+    runPlay
+}
+function pushContainer() {
+    getEnvironment
+    printf "Pushing ${MAX_WHAT} into ${MAX_ENV}...\n"
+    runPlay
+}
+function importContainer() {
+    getEnvironment
+    printf "Exporting ${MAX_WHAT} ${MAX_ENV}...\n"
+    runPlay
+}
+function list() {
+    getEnvironment
+    runPlay
+}
+function deploy() {
+    getEnvironment
+    printf "Deploying ${MAX_WHAT} into ${MAX_ENV}...\n"
+    runPlay
+}
+function undeploy() {
+    getEnvironment
+    printf "Undeploy ${MAX_WHAT} from ${MAX_ENV}..."
+    runPlay
+}
+
+function getListofServices {
+    for i in playbooks/plbk-*.yml
+    do
+        echo $i
+        ansible-playbook --list-tags -i inventories/prd-sample $i | grep "TASK TAGS:"
+    done
+    printf "...\n"
+}
+
+function myhelp() {
+cat << EOH
+Usage:
+  ./max.sh [WHAT] [ACTION] [ENVIRONMENT]
+
+  What     | Actions                       | Environments
+
+  ie:
+    ./max.sh sample-service-go fetch prd
+
+  list of services:
+
+EOH
+  getListofServices
+}
+
+case "${MAX_ACTION}" in
+    "sync") sync;;
+    "fetch") fetch;;
+    "build") build;;
+    "test") test;;
+    "ping") ping;;
+    "export") exportContainer;;
+    "push") pushContainer;;
+    "import") importContainer;;
+    "deploy") deploy;;
+    "undeploy") undeploy;;
+    "list") list;;
+    "help" | "" ) myhelp exit 0; ;;
+esac
+
+exit 0;

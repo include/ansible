@@ -1,0 +1,15 @@
+---
+# file: group_vars/all
+
+# Core Project Settings
+
+project_name: your_name_here
+project_group: "{{ project_name }}"
+project_src_root: /DATA/src
+project_etc_root: /DATA/etc
+docker_root: /DATA/DOCKER
+
+git_root: "https://github.com/include"
+git_branch: master
+
+docker_registry: include

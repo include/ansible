@@ -1,0 +1,28 @@
+---
+
+system_pkgs:
+  - jq
+  - git
+  - vim
+  - zip
+  - ntp
+  - mtr
+  - ntp
+  - curl
+  - tmux
+  - lsof
+  - dstat
+  - iotop
+  - telnet
+  - ntpdate
+  - sysstat
+  - vim-tiny
+  - traceroute
+  - python-simplejson
+  - build-essential
+  - libssl-dev
+  - libxml2-dev
+  - libgnutls-dev
+  - libexpat1-dev
+  - libghc-zlib-dev
+  - libcurl4-gnutls-dev
