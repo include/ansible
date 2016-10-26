@@ -113,7 +113,7 @@ function undeploy() {
 }
 
 function getListofServices {
-    for i in playbooks/"${PLBK}"*.yml
+    for i in playbooks/"${PLBK_PREFIX}"*.yml
     do
         echo $i
         ansible-playbook --list-tags -i inventories/prd-sample $i | grep "TASK TAGS:"
