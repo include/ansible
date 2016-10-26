@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 SCRIPTNAME=`basename $0`
 ROOTDIR="../../../"
@@ -10,9 +9,13 @@ ANSIBLE_PLAYBOOK="`which ansible-playbook` ${ANSIBLE_OPTS}"
 
 PLBK_PREFIX="plbk-"
 
-export MAX_WHAT=$1
-export MAX_ACTION=$2
-export MAX_ENV=$3
+export MAX_WHAT=$1; shift
+export MAX_ACTION=$1; shift
+export MAX_ENV=$1; shift
+
+# shift can result in error, so we move this over here and test MAX_ENV before
+# doing anything
+set -e
 
 # Extracts image version (tag) from cmdline like "sample-service-go:onbuild"
 # if blank, defaults to 'latest'
@@ -27,17 +30,13 @@ export MAX_WHAT=$(echo $MAX_WHAT | awk -F':' '{print $1}')
 # Reads current user running max.sh and passes that variable into playbooks.
 # If this playboook is going to be targeted localy, local user is used, instead
 # root is used (on remote servers).
-WHOAMI=""
-MAX_WHO=""
-MAX_SUDO=""
-function chooseUser() {
-  WHOAMI=`whoami`
-  if [[ "${MAX_ENV}" == "dev" ]]; then
-    export MAX_WHO=${WHOAMI}
+if [[ "${MAX_ENV}" == "dev" ]]; then
+    export MAX_WHO=$(whoami)
     export MAX_SUDO="no"
-  fi
-}
-chooseUser
+else
+    export MAX_WHO=""
+    export MAX_SUDO=""
+fi
 
 # Loads different inventories based on ENV variable captured via cmdline.
 ANSIBLE_HOSTS=""
@@ -52,73 +51,19 @@ function getEnvironment() {
 
 # Prepares the command line statement to be executed by Ansible.
 function runPlay() {
+    getEnvironment
+    printf "${MAX_ACTION}'ing ${MAX_WHAT} in ${MAX_ENV}...\n"
     CMD="${ANSIBLE_PLAYBOOK} -i ${ANSIBLE_HOSTS} ./playbooks/${PLBK_PREFIX}${MAX_WHAT}.yml"
-    echo ${CMD} ; exec ${CMD}
-}
-
-# Ansible Tasks Wrapper
-function sync() {
-    getEnvironment
-    printf "Syncing ${MAX_WHAT} into ${MAX_ENV}...\n"
-    runPlay
-}
-function fetch() {
-    getEnvironment
-    printf "Fetching git repo ${MAX_WHAT} into ${MAX_ENV}...\n"
-    runPlay
-}
-function build() {
-    getEnvironment
-    printf "Building ${MAX_WHAT} into ${MAX_ENV}...\n"
-    runPlay
-}
-function test() {
-    getEnvironment
-    printf "Testing ${MAX_WHAT} into ${MAX_ENV}...\n"
-    runPlay
-}
-function ping() {
-    getEnvironment
-    printf "Pinging ${MAX_WHAT} into ${MAX_ENV}...\n"
-    runPlay
-}
-function exportContainer() {
-    getEnvironment
-    printf "Exporting ${MAX_WHAT} ${MAX_ENV}...\n"
-    runPlay
-}
-function pushContainer() {
-    getEnvironment
-    printf "Pushing ${MAX_WHAT} into ${MAX_ENV}...\n"
-    runPlay
-}
-function importContainer() {
-    getEnvironment
-    printf "Exporting ${MAX_WHAT} ${MAX_ENV}...\n"
-    runPlay
-}
-function list() {
-    getEnvironment
-    runPlay
-}
-function deploy() {
-    getEnvironment
-    printf "Deploying ${MAX_WHAT} into ${MAX_ENV}...\n"
-    runPlay
-}
-function undeploy() {
-    getEnvironment
-    printf "Undeploy ${MAX_WHAT} from ${MAX_ENV}..."
-    runPlay
+    echo ${CMD} $@
+    [ ! -z "$DEBUG" ] || exec ${CMD} $@
 }
 
 function getListofServices {
     for i in playbooks/"${PLBK_PREFIX}"*.yml
     do
-        echo $i
-        ansible-playbook --list-tags -i inventories/prd-sample $i | grep "TASK TAGS:"
+        printf "    "; basename $i | sed -r -e "s/${PLBK_PREFIX}//" -e 's/\.ya?ml//'
+        printf "    "; ansible-playbook --list-tags -i inventories/prd-sample $i | grep "TASK TAGS:" | sed -e 's/TASK TAGS://'
     done
-    printf "...\n"
 }
 
 function myhelp() {
@@ -130,24 +75,28 @@ Usage:
     ./max.sh sample-service-go fetch prd
 
   list of services:
-
 EOH
   getListofServices
 }
 
+# user passed in all params or we throw him the help in his face
+if [ -z "$MAX_ENV" ]; then
+    myhelp
+    exit 1
+fi
+
 case "${MAX_ACTION}" in
-    "sync") sync;;
-    "fetch") fetch;;
-    "build") build;;
-    "test") test;;
-    "ping") ping;;
-    "export") exportContainer;;
-    "push") pushContainer;;
-    "import") importContainer;;
-    "deploy") deploy;;
-    "undeploy") undeploy;;
-    "list") list;;
-    "help" | "" ) myhelp exit 0; ;;
+    "help" | "" ) # show the help
+        myhelp
+    ;;
+
+    'list') # list services
+        getListofServices
+    ;;
+
+    *) # default stuff
+        runPlay $@
+    ;;
 esac
 
 exit 0;

@@ -13,3 +13,9 @@ git_root: "https://github.com/include"
 git_branch: master
 
 docker_registry: include
+
+# Service vars
+
+sample_service_go:
+  HOST_PORT: 8000
+  CONTAINER_PORT: 8080
