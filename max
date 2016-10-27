@@ -61,7 +61,7 @@ function runPlay() {
 function getListofServices {
     for i in playbooks/"${PLBK_PREFIX}"*.yml
     do
-        printf "    "; basename $i | sed -r -e "s/${PLBK_PREFIX}//" -e 's/\.ya?ml//'
+        printf "    "; basename $i | sed -e "s/${PLBK_PREFIX}//" -e 's/\.ya?ml//'
         printf "    "; ansible-playbook --list-tags -i inventories/prd-sample $i | grep "TASK TAGS:" | sed -e 's/TASK TAGS://'
     done
 }
