@@ -13,15 +13,12 @@
 
   vars_files:
     - ../group_vars/all
+    - ../group_vars/packages
 
-  #roles:
-  #  - { role: ../roles/common/, when: ansible_distribution == "Ubuntu" }
+  roles:
+    - { role: ../roles/common/ }
 
   tasks:
-
-    - name: setup docker
-      ping:
-      tags: docker
 
     - name: ping
       ping:

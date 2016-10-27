@@ -1,0 +1,56 @@
+---
+# file: group_vars/packages
+
+# DRY, packages with same name on both systems
+common_pkgs:
+  - git
+  - vim
+  - zip
+  - ntp
+  - mtr
+  - ntp
+  - curl
+  - tmux
+  - lsof
+  - dstat
+  - iotop
+  - docker
+  - telnet
+  - ntpdate
+  - sysstat
+  - traceroute
+  - python-simplejson
+
+# amazon packages
+amazon_pkgs:
+  - redhat-lsb-core
+  - epel-release
+  - collectd
+  - zlib-devel
+  - expat-devel
+  - openssl-devel
+  - libxml2-devel
+  - libcurl-devel
+  - postgresql93-devel
+  - libpng-devel
+  - libjpeg-turbo-devel
+
+amazon_group_pkgs:
+    - "@Console internet tools"
+    - "@Development tools"
+    - "@Networking Tools"
+    - "@Perl Support"
+    - "@System Tools"
+
+# ubuntu packages
+ubuntu_pkgs:
+  - build-essential
+  - libssl-dev
+  - libxml2-dev
+  - libgnutls-dev
+  - libexpat1-dev
+  - libghc-zlib-dev
+  - libcurl4-gnutls-dev
+  - collectd-core
+  - collectd
+  - postgresql-server-dev-9.3
