@@ -50,13 +50,15 @@
 
     - name: deploy container to server
       command: >
-        sudo docker run -d --restart=always --name {{ max_what }}
-        -p {{ HOST_PORT }}:{{ CONTAINER_PORT }}
+        docker run -d --restart=always --name {{ max_what }}
+        -p {{ sample_service_go.HOST_PORT }}:{{ sample_service_go.CONTAINER_PORT }}
         {{ docker_registry }}/{{ max_what }}:{{ max_version }}
+      become: true
       when: max_action == "deploy" and inventory_hostname in groups['{{ max_what }}']
       tags: deploy
 
     - name: undeploy container from server
-      shell: sudo docker stop {{ max_what}} && sudo docker rm -f {{ max_what }}
+      shell: docker stop {{ max_what}} && docker rm -f {{ max_what }}
       when: max_action == "undeploy" and inventory_hostname in groups['{{ max_what }}']
+      become: true
       tags: undeploy
