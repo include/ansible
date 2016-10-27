@@ -10,42 +10,47 @@
     owner=root
     group=root
     state=directory
-  when: max_action == "sync" and max_what == "system"
-  tags: sync
+  become: True
+  when: max_action == "setup" and max_what == "system"
+  tags: setup
 
-- name: common / reates /DATA/src
+- name: common / creates /DATA/src
   file:
     path="{{ project_etc_root }}"
     mode=0644
     owner=root
     group=root
     state=directory
-  when: max_action == "sync" and max_what == "system"
-  tags: sync
+  become: True
+  when: max_action == "setup" and max_what == "system"
+  tags: setup
 
  
 # packages
 
 - name: install amazon base packages 1
   yum: pkg={{ item }} state=latest
-  with_items: amazon_pkgs
+  with_items: "{{ amazon_pkgs }}"
+  become: True
   when: max_action == "setup" and max_what == "system"
   tags: setup
 
 - name: install amazon group packages 2
   yum: pkg="{{ item }}" state=latest
-  with_items: amazon_group_pkgs
+  with_items: "{{ amazon_group_pkgs }}"
+  become: True
   when: max_action == "setup" and max_what == "system"
   tags: setup
 
 - name: install amazon group packages 3
   yum: pkg={{ item }} state=latest
-  with_items: common_pkgs
+  with_items: "{{ common_pkgs }}"
+  become: True
   tags: setup
 
 - name: yum clean all
   command: yum clean all
-  ignore_errors: true
+  become: True
   when: max_action == "setup" and max_what == "system"
   tags: setup
 
@@ -53,3 +58,6 @@
 # setup daemons
 
 - service: name=docker state=started enabled=True
+  become: True
+  when: max_action == "setup" and max_what == "system"
+  tags: setup

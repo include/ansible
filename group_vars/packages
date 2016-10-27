@@ -14,7 +14,6 @@ common_pkgs:
   - lsof
   - dstat
   - iotop
-  - docker
   - telnet
   - ntpdate
   - sysstat
@@ -23,15 +22,14 @@ common_pkgs:
 
 # amazon packages
 amazon_pkgs:
+  - docker
   - redhat-lsb-core
   - epel-release
-  - collectd
   - zlib-devel
   - expat-devel
   - openssl-devel
   - libxml2-devel
   - libcurl-devel
-  - postgresql93-devel
   - libpng-devel
   - libjpeg-turbo-devel
 
@@ -51,6 +49,3 @@ ubuntu_pkgs:
   - libexpat1-dev
   - libghc-zlib-dev
   - libcurl4-gnutls-dev
-  - collectd-core
-  - collectd
-  - postgresql-server-dev-9.3
