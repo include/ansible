@@ -1,10 +1,13 @@
+DOCKER_REGISTRY ?= include
+DOCKER_TAG ?= latest
+
 all: build
 
 build:
-	docker build -t include/ansible .
+	docker build -t $(DOCKER_REGISTRY)/ansible:$(DOCKER_TAG) .
 
 push:
-	docker push include/ansible
+	docker push $(DOCKER_REGISTRY)/ansible:$(DOCKER_TAG)
 
 run:
 	docker run -e AWS_ACCESS_KEY_ID="$(AWS_ACCESS_KEY_ID)"         \
@@ -13,4 +16,4 @@ run:
 	           -e ANSIBLE_HOSTS="./inventories/ec2.py"             \
 	           -e EC2_INIT_PATH="./inventories/ec2.ini"            \
 	           -v ~/.ssh:/root/.ssh                                \
-	           -ti include/ansible /bin/bash
+	           -ti $(DOCKER_REGISTRY)/ansible:$(DOCKER_TAG) /bin/bash
