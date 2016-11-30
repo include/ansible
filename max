@@ -43,6 +43,8 @@ ANSIBLE_HOSTS=""
 function getEnvironment() {
     if [ -f "inventories/${MAX_ENV}" ]; then
         export ANSIBLE_HOSTS="inventories/${MAX_ENV}"
+    elif [ -f "inventories/${MAX_ENV}.ini" ]; then
+        export ANSIBLE_HOSTS="inventories/${MAX_ENV}.ini"
     else
         printf "ERROR: unknown Environment!\n"
         exit 1;
